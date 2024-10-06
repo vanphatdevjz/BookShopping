@@ -1,0 +1,34 @@
+﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+@{
+    Layout = "_AdminLayout";
+}
+<h2>Danh Sách Người Dùng</h2>
+
+<a href="/Account/Create" class="btn btn-success mb-3">Thêm Người Dùng</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Tên Người Dùng</th>
+            <th>Số Điện Thoại</th>
+            <th>Hành Động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.UserName</td>
+                <td>@user.PhoneNumber</td>
+                <td>
+                    <a href="/Account/Edit/@user.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <form action="/Account/Delete/@user.Id" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

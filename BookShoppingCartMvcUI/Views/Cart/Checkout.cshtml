@@ -1,0 +1,77 @@
+﻿@model CheckoutModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Thông tin đặt hàng</h2>
+<form asp-action="Checkout">
+    <div class="py-2">
+        <label asp-for="Name">Họ Tên*</label>
+        <input type="text" class="form-control" asp-for="Name" value="Dương Văn Phát" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="py-2">
+        <label asp-for="Email">Email*</label>
+        <input type="text" class="form-control" asp-for="Email" value="duongvanphat2002@gmail.com" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+
+    </div>
+
+    <div class="py-2">
+        <label asp-for="MobileNumber">Số Điện Thoại*</label>
+        <input type="text" class="form-control" asp-for="MobileNumber" value="0123456789" />
+        <span asp-validation-for="MobileNumber" class="text-danger"></span>
+    </div>
+
+
+    <div class="py-2">
+        <label asp-for="Address" >Địa Chỉ*</label>
+        <input type="text" class="form-control" asp-for="Address" rows="5" value="99 Định Công Hạ, Hoàng Mai, Hà Nội"></input>
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="py-2">
+        <span class="mr-2">COD*</span>
+        <select asp-for="PaymentMethod" class="form-control" id="paymentMethodSelect">
+            <option value="">Lựa chọn phương thức thanh toán</option>
+            @foreach (var method in Enum.GetValues(typeof(BookShoppingCartMvcUI.Constants.PaymentMethods)))
+            {
+                <option value="@method.ToString()">@method.ToString()</option>
+
+            }
+        </select>
+        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+    </div>
+
+    <div class="py-2">
+        <button type="submit" id="codButton" class="btn btn-success">Thanh toán ShipCod</button>
+    </div>
+    <div class="py-2">
+        <button type="button" id="onlineButton" class="btn btn-danger" onclick="location.href='@Url.Action("Index", "Checkout")'">Thanh Toán Online</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        document.getElementById("paymentMethodSelect").addEventListener("change", function () {
+            var selectedMethod = this.value;
+            var codButton = document.getElementById("codButton");
+            var onlineButton = document.getElementById("onlineButton");
+
+            if (selectedMethod === "COD") {
+                codButton.style.display = "block";
+                onlineButton.style.display = "none";
+            } else if (selectedMethod === "Online") {
+                codButton.style.display = "none";
+                onlineButton.style.display = "block";
+            } else {
+                codButton.style.display = "block";
+                onlineButton.style.display = "block";
+            }
+        });
+
+        // Trigger the change event on page load to set the initial visibility of the buttons
+        document.getElementById("paymentMethodSelect").dispatchEvent(new Event('change'));
+    </script>
+}

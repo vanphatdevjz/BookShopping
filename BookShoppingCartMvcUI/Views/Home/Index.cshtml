@@ -1,0 +1,129 @@
+﻿@model BookDisplayModel
+@{
+}
+
+<div class="my-2">
+    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
+        <div class="col-12">
+            <label class="visually-hidden" for="genreId">Genres</label>
+            <select class="form-select" id="genreId" name="genreId">
+                <option selected>Thể loại</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    <option selected="@(genre.Id == Model.GenreId)" value="@genre.Id">@genre.GenreName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="visually-hidden" for="sterm">Tìm kiếm theo tên sách</label>
+            <div class="input-group">
+                <div class="input-group-text"></div>
+                <input type="text" class="form-control" value="@Model.STerm" id="sterm" name="sterm" placeholder="Tìm kiếm theo tên sách">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            <a href="/Home/Index" class="btn btn-dark">Làm mới</a>
+        </div>
+    </form>
+</div>
+
+<div class="w-100 mt-4 d-flex flex-wrap">
+    @foreach (var book in Model.Books)
+    {
+        <div class="card mx-3 mb-4" style="width: 11rem;">
+            @if (string.IsNullOrEmpty(book.Image))
+            {
+                <img style="width:100%;height:180px" src="/images/NoImage.png" class="card-img-top" alt="...">
+            }
+            else
+            {
+                <img style="width:100%;height:180px" src="/images/@book.Image" class="card-img-top" alt="...">
+            }
+            <div class="card-body">
+                <h5 class="card-title">@book.BookName</h5>
+                <p class="card-text">
+                    <b>Thể Loại: </b>@book.GenreName <br />
+                    <b>Tác giả: </b>@book.AuthorName <br />
+                    <b>Giá: </b>@book.Price
+                    @* <br/> <b>@book.Quantity</b> *@
+                </p>
+                @if (book.Quantity > 0)
+                {
+                    <button type="button" onclick="add(@book.Id)" class="btn btn-danger">Thêm vào giỏ</button>
+                    <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#pdfModal" onclick="loadPdf('/pdfs/1.pdf')">
+                        Đọc thử sách
+                    </button>
+                }
+                else
+                {
+                    <span style="border: 1px solid; padding: 5px 8px; color: red; border-radius: 5px;">Hết hàng</span>
+                }
+
+                @if (!string.IsNullOrEmpty(book.PdfPath))
+                {
+                    <button type="button" onclick="showPdf('@Url.Action("ShowPdf", "Pdf", new { bookId = book.Id })')" class="btn btn-secondary mt-2">Hiển thị PDF</button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<df-messenger intent="WELCOME"
+              chat-title="Book_Chat_AI"
+              agent-id="cc71f33e-99e2-4858-bab1-1789d90ca259"
+              language-code="vi"></df-messenger>
+
+@section Scripts {
+    <script>
+        async function add(bookId) {
+            var usernameEl = document.getElementById("username");
+            if (usernameEl == null) {
+                window.location.href = "/Identity/Account/Login";
+            }
+            try {
+                var response = await fetch(`/Cart/AddItem?bookId=${bookId}`);
+                if (response.status == 200) {
+                    var result = await response.json();
+                    var cartCountEl = document.getElementById("cartCount");
+                    cartCountEl.innerHTML = result;
+                    window.location.href = "#cartCount";
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        function loadPdf(pdfUrl) {
+            document.getElementById('pdfFrame').src = pdfUrl;
+        }
+
+        function showPdf(pdfUrl) {
+            var iframe = document.getElementById('pdfViewer');
+            if (iframe) {
+                iframe.style.display = 'block';
+                iframe.src = pdfUrl;
+            } else {
+                console.error("Không tìm thấy iframe để hiển thị PDF.");
+            }
+        }
+    </script>
+}
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">Đọc thử sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="pdfFrame" src="" width="100%" height="500px"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

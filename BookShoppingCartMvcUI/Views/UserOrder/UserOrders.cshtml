@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Order>
+@{
+    // Từ điển ánh xạ ID trạng thái đơn hàng sang tên tiếng Việt
+    var orderStatusTranslations = new Dictionary<int, string>
+    {
+        { 1, "Chờ giao hàng" },
+        { 2, "Đang giao hàng" },
+        { 3, "Đã giao thành công" },
+        { 4, "Chưa giao thành công" },
+        { 5, "Đã trả lại" },
+        { 6, "Shiper đưa tiền cửa hàng " }
+    };
+}
+
+<div style="width:100%" class="mt-2">
+    <a href="/Identity/Account/Manage" class="btn btn-primary my-2">Trở lại</a>
+
+    <h4>Đơn hàng của tôi</h4>
+    @if (Model != null && Model.Count() > 0)
+    {
+        <table class="table table-striped">
+            <tr>
+                <th>Ngày đặt hàng</th>
+                <th>Trạng thái đơn hàng</th>
+            </tr>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.CreateDate.ToString("dd-MM-yyyy")</td>
+                    <td>
+                        @{
+                            var statusName = orderStatusTranslations.ContainsKey(order.OrderStatus.StatusId)
+                            ? orderStatusTranslations[order.OrderStatus.StatusId]
+                            : order.OrderStatus.StatusName;
+                        }
+                        @statusName
+                    </td>
+                </tr>
+                @if (order.OrderDetail != null && order.OrderDetail.Count > 0)
+                {
+                    <tr>
+                        <td>
+                            <table class="table table-striped">
+                                <tr>
+                                    <td>
+                                        Tổng giá:
+                                    </td>
+                                    <td>
+                                        @(order.OrderDetail.Select(item => item.Book.Price * item.Quantity).Sum())
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Sách</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thể loại</th>
+                                    <th>Đơn vị giá</th>
+                                    <th>Tổng giá tiền</th>
+                                </tr>
+                                @foreach (var item in order.OrderDetail)
+                                {
+                                    <tr>
+                                        <td>@item.Book.BookName</td>
+                                        <td>
+                                            @if (string.IsNullOrEmpty(item.Book.Image))
+                                            {
+                                                <img src="/images/NoImage.png" style="width:80px;height:100px" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/@item.Book.Image" style="width:80px;height:100px" />
+                                            }
+                                        </td>
+                                        <td>@item.Book.Genre.GenreName</td>
+                                        <td>@item.Book.Price X @item.Quantity</td>
+                                        <td> @(item.Book.Price * item.Quantity) </td>
+                                    </tr>
+                                }
+                            </table>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+
+    }
+    else
+    {
+        <h5>Không có đơn hàng</h5>
+    }
+</div>
+
+
+
+
